@@ -7,6 +7,12 @@ def get_kernel():
     kernel = kernel.split('-')
     return kernel
 
+
+def get_fqdn():
+    fqdn = subprocess.check_output(['hostname', '-f']).decode('utf-8').strip('\n')
+    fqdn = fqdn.split('.')
+    return fqdn
+
 if __name__ == '__main__':
     print(get_kernel())
-    print
+    print(get_fqdn())
