@@ -13,6 +13,13 @@ def get_fqdn():
     fqdn = fqdn.split('.')
     return fqdn
 
+def get_uptime():
+    uptime = subprocess.check_output(['uptime', '-p']).decode('utf-8').strip('\n')
+    uptime = uptime.replace(',', '')
+    uptime = uptime.split()
+    return uptime
+
 if __name__ == '__main__':
     print(get_kernel())
     print(get_fqdn())
+    print(get_uptime())
