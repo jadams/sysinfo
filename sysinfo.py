@@ -2,6 +2,11 @@
 
 import os, sys, subprocess, datetime
 
+def pretty_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True, iproute=True):
+    print('Kernel: {0} release: {1}'.format(*get_kernel()))
+    print('Hostname: {0}.{1}.{2}'.format(*get_fqdn()))
+    print('Uptime: {days} Days, {hours} Hours, {mins} Minutes'.format(**get_uptime()))
+
 def get_kernel():
     kernel =  subprocess.check_output(['uname', '-r']).decode('utf-8').strip('\n')
     kernel = kernel.split('-')
@@ -63,4 +68,5 @@ if __name__ == '__main__':
     #print(get_uptime())
     #print(get_date())
     #print(get_ip_addr())
-    print(get_ip_route())
+    #print(get_ip_route())
+    pretty_print()
