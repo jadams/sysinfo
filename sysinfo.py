@@ -40,9 +40,27 @@ def get_ip_addr():
             ip[iface]['ipv4'].append(address)
     return ip
 
+def get_ip_route():
+    route = subprocess.check_output(['ip', 'route']).decode('utf-8').strip('\n')
+    route = route.split('\n')
+    routes = {}
+    for line in route:
+        info = line.split()
+        name = info[0]
+        routes[name] = {}
+        for i in range(1,len(info)):
+            if info[i] == 'dev':
+                routes[name]['dev'] = info[i+1]
+            elif info[i] == 'via':
+                routes[name]['via'] = info[i+1]
+            elif info[i] == 'src':
+                routes[name]['src'] = info[i+1]
+    return routes
+
 if __name__ == '__main__':
-    print(get_kernel())
-    print(get_fqdn())
-    print(get_uptime())
-    print(get_date())
-    print(get_ip_addr())
+    #print(get_kernel())
+    #print(get_fqdn())
+    #print(get_uptime())
+    #print(get_date())
+    #print(get_ip_addr())
+    print(get_ip_route())
