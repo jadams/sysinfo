@@ -32,18 +32,18 @@ def get_date():
 def get_ip_addr():
     addr = subprocess.check_output(['ip', 'addr']).decode('utf-8').strip('\n')
     addr = addr.split('\n')
-    ip = {}
+    addrs = {}
     for line in addr:
         if line[0].isdigit():
             iface = line.split()[1].strip(':')
-            ip[iface] = {'ipv6':[], 'ipv4':[]}
+            addrs[iface] = {'ipv6':[], 'ipv4':[]}
         if 'inet6' in line:
             address = line.split()[1].split('/')
-            ip[iface]['ipv6'].append(address)
+            addrs[iface]['ipv6'].append(address)
         elif 'inet' in line:
             address = line.split()[1].split('/')
-            ip[iface]['ipv4'].append(address)
-    return ip
+            addrs[iface]['ipv4'].append(address)
+    return addrs
 
 def get_ip_route():
     route = subprocess.check_output(['ip', 'route']).decode('utf-8').strip('\n')
