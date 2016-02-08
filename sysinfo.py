@@ -17,7 +17,7 @@ def get_uptime():
     uptime = subprocess.check_output(['uptime', '-p']).decode('utf-8').strip('\n')
     uptime = uptime.replace(',', '')
     uptime = uptime.split()
-    return uptime
+    return {'days':int(uptime[1]), 'hours':int(uptime[3]), 'mins':int(uptime[5])}
 
 if __name__ == '__main__':
     print(get_kernel())
