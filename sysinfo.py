@@ -104,10 +104,15 @@ def _get_mounts():
     return
 
 def _get_cpuinfo():
-    return
+    if os.path.isfile('/proc/cpuinfo'):
+        with open('/proc/cpuinfo', 'r') as cpuinfo:
+            for line in cpuinfo:
+                if 'model name' in line:
+                    return line.strip('\n').split(':')[1].split()
 
 def _get_meminfo():
-    return
+    meminfo = subprocess.check_output(['free', '-h']).decode('utf-8').strip('\n').split()
+    return {'total':meminfo[7], 'used':meminfo[8], 'swap':meminfo[14]}
 
 def _get_current_user():
     return os.getenv('USER')
@@ -128,10 +133,10 @@ def _get_listening_ports():
     return
 
 def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True, iproute=True):
-    print('Kernel: {0}-{1}'.format(*_get_kernel()))
-    print('Hostname: {0}.{1}.{2}'.format(*_get_fqdn()))
-    print('Uptime: {days} Days, {hours} Hours, {mins} Minutes'.format(**_get_uptime()))
-    print('Date: {0} {1}'.format(*_get_date()))
+    print('Kernel:\t{0}-{1}'.format(*_get_kernel()))
+    print('Host:\t{0}.{1}.{2}'.format(*_get_fqdn()))
+    print('Uptime:\t{days} Days, {hours} Hours, {mins} Minutes'.format(**_get_uptime()))
+    print('Date:\t{0} {1}'.format(*_get_date()))
 
     print('IP Addresses: ')
     ipinfo = _get_ip_addr()
@@ -164,15 +169,13 @@ def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True, ipro
     for user in users:
         print('\t{0}: {1}'.format(user, 'uid={uid}, gid={gid}, home={home}, shell={shell}'.format(**users[user])))
 
-    print('Distro:')
-    ddict = _detect_distro()
-    for key in ddict:
-        print('\t{0}: {1}'.format(key, ddict[key]))
+    print('CPU:\t{}'.format(' '.join(_get_cpuinfo())))
+    print('Memory:\t{total}/{used} Swap: {swap}'.format(**_get_meminfo()))
 
 def short_print():
     print('{0} {1}'.format(*_get_date()))
     print('{0}@{1}'.format(_get_current_user(), _get_fqdn()[0]))
-    print('{0}-{1}'.format(*_get_kernel()),'{pretty_name}'.format(**_detect_distro()))
+    print('{0}-{1}'.format(*_get_kernel()))
     print('Up: {days} Days, {hours} Hours, {mins} Minutes'.format(**_get_uptime()))
 
 if __name__ == '__main__':
