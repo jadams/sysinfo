@@ -156,13 +156,14 @@ def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True,
     for user in users:
         print('\t{0}: {1}'.format(user, 
             'uid={uid}, gid={gid}, home={home}, shell={shell}'.format(**users[user])))
+
     print('CPU:\t{}'.format(' '.join(_get_cpuinfo())))
     print('Memory:\t{total}/{used} Swap: {swap}'.format(**_get_meminfo()))
 
 def short_print():
-    print('{0} {1}'.format(*_get_date()))
+    print(' '.join(_get_date()))
     print('{0}@{1}'.format(_get_current_user(), _get_fqdn()[0]))
-    print('{0}-{1}'.format(*_get_kernel()))
+    print('-'.join(_get_kernel()))
     print('Up: {days} Days, {hours} Hours, {mins} Minutes'.format(**_get_uptime()))
 
 def get_json():
@@ -180,6 +181,7 @@ def get_json():
 
 if __name__ == '__main__':
     full_print()
-    #short_print()
-    #with open('host.json', 'w') as outfile:
-    #    json.dump(get_json(), outfile)
+    print('==============================')
+    short_print()
+    with open('host.json', 'w') as outfile:
+        json.dump(get_json(), outfile)
