@@ -91,6 +91,42 @@ def _detect_distro():
             else:
                 return {'id':'Other Linux'}
 
+def _get_processes():
+    return
+
+def _get_hosts():
+    return
+
+def _get_dns():
+    return
+
+def _get_mounts():
+    return
+
+def _get_cpuinfo():
+    return
+
+def _get_meminfo():
+    return
+
+def _get_current_user():
+    return
+
+def _get_systemd_services():
+    return
+
+def _get_initd_services():
+    return
+
+def _get_usb_dev():
+    return
+
+def _get_pci_dev():
+    return
+
+def _get_listening_ports():
+    return
+
 def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True, iproute=True):
     print('Kernel: {0}-{1}'.format(*_get_kernel()))
     print('Hostname: {0}.{1}.{2}'.format(*_get_fqdn()))
@@ -136,4 +172,3 @@ def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True, ipro
 
 if __name__ == '__main__':
     full_print()
-    #_detect_distro()
