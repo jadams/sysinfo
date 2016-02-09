@@ -98,7 +98,12 @@ def _get_cpuinfo():
 
 def _get_meminfo():
     meminfo = subprocess.check_output(['free', '-h']).decode('utf-8').strip('\n').split()
-    return {'total':meminfo[7], 'used':meminfo[8], 'swap':meminfo[14]}
+    mem =meminfo.index("Mem:")
+    swap=meminfo.index("Swap:")
+    return {'total':meminfo[int(mem)+1],
+            'used':meminfo[int(mem)+2], 
+            'swap_total':meminfo[int(swap)+1],
+            'swap_used':meminfo[int(swap)+2]}
 
 def _get_current_user():
     return os.getenv('USER')
@@ -158,7 +163,7 @@ def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True,
             'uid={uid}, gid={gid}, home={home}, shell={shell}'.format(**users[user])))
 
     print('CPU:\t{}'.format(' '.join(_get_cpuinfo())))
-    print('Memory:\t{total}/{used} Swap: {swap}'.format(**_get_meminfo()))
+    print('Memory:\t{used}/{total} Swap: {swap_used}/{swap_total}'.format(**_get_meminfo()))
 
 def short_print():
     print(' '.join(_get_date()))
