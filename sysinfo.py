@@ -10,13 +10,25 @@ def _get_kernel():
 def _get_fqdn():
     fqdn = subprocess.check_output(['hostname', '-f']).decode('utf-8').strip('\n')
     fqdn = fqdn.split('.')
+
+    # checks that fqdn contains all 3 variables for full_print()
+    for i in range(0,3):
+        try:
+            fqdn[i]
+        except:
+            fqdn.append('')
     return fqdn
 
 def _get_uptime():
-    uptime = subprocess.check_output(['uptime', '-p']).decode('utf-8').strip('\n')
-    uptime = uptime.replace(',', '')
-    uptime = uptime.split()
-    return {'days':int(uptime[1]), 'hours':int(uptime[3]), 'mins':int(uptime[5])}
+    uptime = subprocess.check_output(['uptime']).decode('utf-8').strip('\n')
+    uptime = uptime[uptime.index('up')+2:uptime.index(',')].strip()
+    uptime = uptime.split(':')
+    if(len(uptime)==3):
+        return {'days':int(uptime[0]), 'hours':int(uptime[1]), 'mins':int(uptime[2])}
+    elif(len(uptime)==2):
+        return {'days':0, 'hours':int(uptime[0]), 'mins':int(uptime[1])}
+    else:
+        return {'days':0, 'hours':0, 'mins':int(uptime[0])}
 
 def _get_date():
     dt = str(datetime.datetime.now()).split()
@@ -66,26 +78,43 @@ def _get_users():
                 for line in passwd:
                     line = line.strip('\n').split(':')
                     if int(line[2]) >= 1000:
-                        users[line[0]] = {'uid':int(line[2]), 'gid':int(line[3]), 'home':line[5], 'shell':line[6]}
+                        users[line[0]] = {'uid':int(line[2]), 
+                                          'gid':int(line[3]), 
+                                          'home':line[5], 
+                                          'shell':line[6]}
         except:
             return NULL
         return users
 
 def _detect_distro():
+    # consider using an array of filenames instead of the nested ifs below
+    # if that singular file contains all the information necessary
     if os.path.isfile('/etc/os-release'):
+        
+        # add delimiters according to distribution 
+        delim_dict={'Red Hat':' ','Ubuntu':'=','elementary OS':'='}
+
         with open('/etc/os-release', 'r') as relfile:
+            delim = ''
             ddict = {}
             for line in relfile:
-                ll = line.strip('\n').replace('\"', '').split('=')
-                if len(ll) > 1:
-                    ddict[ll[0].lower()] = ll[1]
-        return ddict
+                if not delim:
+                    if "NAME" in line:
+                        delim = delim_dict[line[6:-2]]
+                        relfile.seek(0)
+                else:
+                    ll = line.strip('\n').split(delim,1)
+                    ll[:] = [l.replace('\"','') for l in ll]
+                    if len(ll) > 1:
+                        ddict[ll[0].lower()] = ll[1]
+            return ddict
+        return {}
     else:
         try:
             subprocess.check_output(['lsb_release', '-a'])
         except:
             if os.path.isfile('/etc/redhat-release'):
-                return {'id':'Redhat Linux'}
+                return {'id':'Red Hat Linux'}
             elif os.path.isfile('/etc/debian_version'):
                 return {'id':'Debian Linux'}
             else:
@@ -111,7 +140,8 @@ def _get_cpuinfo():
                     return line.strip('\n').split(':')[1].split()
 
 def _get_meminfo():
-    meminfo = subprocess.check_output(['free', '-h']).decode('utf-8').strip('\n').split()
+    meminfo = subprocess.check_output(['free', '-h']).decode('utf-8').strip('\n')
+        .split()
     return {'total':meminfo[7], 'used':meminfo[8], 'swap':meminfo[14]}
 
 def _get_current_user():
@@ -132,10 +162,12 @@ def _get_pci_dev():
 def _get_listening_ports():
     return
 
-def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True, iproute=True):
+def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True, 
+    iproute=True):
     print('Kernel:\t{0}-{1}'.format(*_get_kernel()))
     print('Host:\t{0}.{1}.{2}'.format(*_get_fqdn()))
-    print('Uptime:\t{days} Days, {hours} Hours, {mins} Minutes'.format(**_get_uptime()))
+    print('Uptime:\t{days} Days, {hours} Hours, {mins} Minutes'
+        .format(**_get_uptime()))
     print('Date:\t{0} {1}'.format(*_get_date()))
 
     print('IP Addresses: ')
@@ -167,7 +199,8 @@ def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True, ipro
     print('Users:')
     users = _get_users()
     for user in users:
-        print('\t{0}: {1}'.format(user, 'uid={uid}, gid={gid}, home={home}, shell={shell}'.format(**users[user])))
+        print('\t{0}: {1}'.format(user, 
+            'uid={uid}, gid={gid}, home={home}, shell={shell}'.format(**users[user])))
 
     print('CPU:\t{}'.format(' '.join(_get_cpuinfo())))
     print('Memory:\t{total}/{used} Swap: {swap}'.format(**_get_meminfo()))
