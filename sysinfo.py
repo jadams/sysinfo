@@ -17,7 +17,6 @@ def _get_uptime():
         uptime = datetime.timedelta(seconds = float(upfile.readline().split()[0]))
     return {'days':uptime.days, 'hours':int(uptime.seconds/3600), 'mins':int(uptime.seconds%3600/60), 'secs':int(uptime.seconds%3600%60)}
 
-
 def _get_date():
     dt = str(datetime.datetime.now()).split()
     dt[1] = dt[1].split('.')[0]
@@ -66,13 +65,21 @@ def _get_users():
                 for line in passwd:
                     line = line.strip('\n').split(':')
                     if int(line[2]) >= 1000:
-                        users[line[0]] = {'uid':int(line[2]), 
-                                          'gid':int(line[3]), 
-                                          'home':line[5], 
+                        users[line[0]] = {'uid':int(line[2]),
+                                          'gid':int(line[3]),
+                                          'home':line[5],
                                           'shell':line[6]}
         except:
             return NULL
         return users
+
+def _get_disks():
+    try:
+        diskdict = {}
+        disks = subprocess.check_output(['lsblk', '-lnf']).decode('utf-8').strip('\n').split()
+        return
+    except:
+        return
 
 def _detect_distro():
     return
@@ -98,10 +105,10 @@ def _get_cpuinfo():
 
 def _get_meminfo():
     meminfo = subprocess.check_output(['free', '-h']).decode('utf-8').strip('\n').split()
-    mem =meminfo.index("Mem:")
-    swap=meminfo.index("Swap:")
+    mem = meminfo.index("Mem:")
+    swap = meminfo.index("Swap:")
     return {'total':meminfo[int(mem)+1],
-            'used':meminfo[int(mem)+2], 
+            'used':meminfo[int(mem)+2],
             'swap_total':meminfo[int(swap)+1],
             'swap_used':meminfo[int(swap)+2]}
 
@@ -123,8 +130,7 @@ def _get_pci_dev():
 def _get_listening_ports():
     return
 
-def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True, 
-    iproute=True):
+def full_print():
     print('Kernel:\t{0}-{1}'.format(*_get_kernel()))
     print('Host:\t{}'.format('.'.join(_get_fqdn())))
     print('Uptime:\t{days} Days, {hours} Hours, {mins} Minutes'.format(**_get_uptime()))
@@ -152,14 +158,14 @@ def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True,
     for route in iproute:
         proute = '\t{}'.format(route)
         for key in iproute[route]:
-            #proute = proute+' '+key+' '+iproute[route][key] 
-            proute = '{0} {1} {2}'.format(proute, key, iproute[route][key]) 
+            #proute = proute+' '+key+' '+iproute[route][key]
+            proute = '{0} {1} {2}'.format(proute, key, iproute[route][key])
         print(proute)
 
     print('Users:')
     users = _get_users()
     for user in users:
-        print('\t{0}: {1}'.format(user, 
+        print('\t{0}: {1}'.format(user,
             'uid={uid}, gid={gid}, home={home}, shell={shell}'.format(**users[user])))
 
     print('CPU:\t{}'.format(' '.join(_get_cpuinfo())))
@@ -185,8 +191,9 @@ def get_json():
     return jdb
 
 if __name__ == '__main__':
-    full_print()
-    print('==============================')
-    short_print()
-    with open('host.json', 'w') as outfile:
-        json.dump(get_json(), outfile)
+    # full_print()
+    # print('==============================')
+    # short_print()
+    # with open('host.json', 'w') as outfile:
+    #     json.dump(get_json(), outfile)
+    _get_disks()
