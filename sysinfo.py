@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, sys, subprocess, datetime
+import os, sys, subprocess, datetime, json
 
 def _get_kernel():
     kernel =  subprocess.check_output(['uname', '-r']).decode('utf-8').strip('\n')
@@ -178,6 +178,21 @@ def short_print():
     print('{0}-{1}'.format(*_get_kernel()))
     print('Up: {days} Days, {hours} Hours, {mins} Minutes'.format(**_get_uptime()))
 
+def get_json():
+    jdb = {}
+    jdb['kernel'] = _get_kernel()
+    jdb['hostname'] = _get_fqdn()
+    jdb['uptime'] = _get_uptime()
+    jdb['date'] = _get_date()
+    jdb['ipaddr'] = _get_ip_addr()
+    jdb['iproute'] = _get_ip_route()
+    jdb['users'] = _get_users()
+    jdb['cpu'] = _get_cpuinfo()
+    jdb['mem'] = _get_meminfo()
+    return jdb
+
 if __name__ == '__main__':
-    full_print()
+    #full_print()
     #short_print()
+    with open('host.json', 'w') as outfile:
+        json.dump(get_json(), outfile)
