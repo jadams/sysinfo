@@ -110,7 +110,7 @@ def _get_meminfo():
     return
 
 def _get_current_user():
-    return
+    return os.getenv('USER')
 
 def _get_systemd_services():
     return
@@ -169,6 +169,12 @@ def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True, ipro
     for key in ddict:
         print('\t{0}: {1}'.format(key, ddict[key]))
 
+def short_print():
+    print('{0} {1}'.format(*_get_date()))
+    print('{0}@{1}'.format(_get_current_user(), _get_fqdn()[0]))
+    print('{0}-{1}'.format(*_get_kernel()),'{pretty_name}'.format(**_detect_distro()))
+    print('Up: {days} Days, {hours} Hours, {mins} Minutes'.format(**_get_uptime()))
 
 if __name__ == '__main__':
     full_print()
+    #short_print()
