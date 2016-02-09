@@ -78,6 +78,25 @@ def _get_disks():
         diskdict = {}
         disks = subprocess.check_output(['lsblk', '-lnf']).decode('utf-8').strip('\n').split()
         return
+        # Format:
+        # {
+        # 'sda': {
+        #         'sda1': {
+        #                 'fs':'vfat',
+        #                 'mount':'/boot/efi'
+        #                 },
+        #         'sda2': {
+        #                 'fs':'ext4',
+        #                 'mount':'/'
+        #                 }
+        #         },
+        # 'sdb': {
+        #         'sdb1': {
+        #                 'fs':'ntfs',
+        #                 'mount':'/windows'
+        #                 }
+        #         }
+        # }
     except:
         return
 
