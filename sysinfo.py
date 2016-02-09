@@ -2,12 +2,6 @@
 
 import os, sys, subprocess, datetime
 
-def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True, iproute=True):
-    print('Kernel: {0}-{1}'.format(*_get_kernel()))
-    print('Hostname: {0}.{1}.{2}'.format(*_get_fqdn()))
-    print('Uptime: {days} Days, {hours} Hours, {mins} Minutes'.format(**_get_uptime()))
-    print('Date: {0} {1}'.format(*_get_date()))
-
 def _get_kernel():
     kernel =  subprocess.check_output(['uname', '-r']).decode('utf-8').strip('\n')
     kernel = kernel.split('-')
@@ -62,11 +56,57 @@ def _get_ip_route():
                 routes[name]['src'] = info[i+1]
     return routes
 
+def _get_users():
+    if not os.path.isfile('/etc/passwd'):
+        return NULL
+    else:
+        users = {}
+        try:
+            with open('/etc/passwd', 'r') as passwd:
+                for line in passwd:
+                    line = line.strip('\n').split(':')
+                    if int(line[2]) >= 1000:
+                        users[line[0]] = {'uid':int(line[2]), 'gid':int(line[3]), 'home':line[5], 'shell':line[6]}
+        except:
+            return NULL
+        return users
+
+def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True, iproute=True):
+    print('Kernel: {0}-{1}'.format(*_get_kernel()))
+    print('Hostname: {0}.{1}.{2}'.format(*_get_fqdn()))
+    print('Uptime: {days} Days, {hours} Hours, {mins} Minutes'.format(**_get_uptime()))
+    print('Date: {0} {1}'.format(*_get_date()))
+
+    print('IP Addresses: ')
+    ipinfo = _get_ip_addr()
+    for iface in ipinfo:
+        print('{}:'.format(iface))
+        if not ipinfo[iface]['ipv4']:
+            continue
+        else:
+            print('\tIPv4:')
+            for addr in ipinfo[iface]['ipv4']:
+                print('\t\t{}'.format('/'.join(addr)))
+        if not ipinfo[iface]['ipv6']:
+            continue
+        else:
+            print('\tIPv6:')
+            for addr in ipinfo[iface]['ipv6']:
+                print('\t\t{}'.format('/'.join(addr)))
+
+    print('Routes:')
+    iproute = _get_ip_route()
+    for route in iproute:
+        proute = '\t{}'.format(route)
+        for key in iproute[route]:
+            #proute = proute+' '+key+' '+iproute[route][key] 
+            proute = '{0} {1} {2}'.format(proute, key, iproute[route][key]) 
+        print(proute)
+
+    print('Users:')
+    users = _get_users()
+    for user in users:
+        print('\t{0}: {1}'.format(user, 'uid={uid}, gid={gid}, home={home}, shell={shell}'.format(**users[user])))
+
 if __name__ == '__main__':
-    #print(_get_kernel())
-    #print(_get_fqdn())
-    #print(_get_uptime())
-    #print(_get_date())
-    #print(_get_ip_addr())
-    #print(_get_ip_route())
     full_print()
