@@ -98,8 +98,8 @@ def _get_cpuinfo():
 
 def _get_meminfo():
     meminfo = subprocess.check_output(['free', '-h']).decode('utf-8').strip('\n').split()
-    mem =[i for i,x in enumerate(meminfo) if "Mem:" in x][0]
-    swap=[i for i,x in enumerate(meminfo) if "Swap:" in x][0]
+    mem =meminfo.index("Mem:")
+    swap=meminfo.index("Swap:")
     return {'total':meminfo[int(mem)+1],
             'used':meminfo[int(mem)+2], 
             'swap_total':meminfo[int(swap)+1],
