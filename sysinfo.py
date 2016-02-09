@@ -71,6 +71,26 @@ def _get_users():
             return NULL
         return users
 
+def _detect_distro():
+    if os.path.isfile('/etc/os-release'):
+        with open('/etc/os-release', 'r') as relfile:
+            ddict = {}
+            for line in relfile:
+                ll = line.strip('\n').replace('\"', '').split('=')
+                if len(ll) > 1:
+                    ddict[ll[0].lower()] = ll[1]
+        return ddict
+    else:
+        try:
+            subprocess.check_output(['lsb_release', '-a'])
+        except:
+            if os.path.isfile('/etc/redhat-release'):
+                return {'id':'Redhat Linux'}
+            elif os.path.isfile('/etc/debian_version'):
+                return {'id':'Debian Linux'}
+            else:
+                return {'id':'Other Linux'}
+
 def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True, iproute=True):
     print('Kernel: {0}-{1}'.format(*_get_kernel()))
     print('Hostname: {0}.{1}.{2}'.format(*_get_fqdn()))
@@ -108,5 +128,12 @@ def full_print(kernel=True, fqdn=True, uptime=True, date=True, ipaddr=True, ipro
     for user in users:
         print('\t{0}: {1}'.format(user, 'uid={uid}, gid={gid}, home={home}, shell={shell}'.format(**users[user])))
 
+    print('Distro:')
+    ddict = _detect_distro()
+    for key in ddict:
+        print('\t{0}: {1}'.format(key, ddict[key]))
+
+
 if __name__ == '__main__':
     full_print()
+    #_detect_distro()
