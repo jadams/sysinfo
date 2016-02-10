@@ -80,10 +80,10 @@ def _get_users():
 
 def _get_disks():
     try:
-        diskdict = {}
-        disks = subprocess.check_output(['lsblk', '-lnf']).decode('utf-8').strip('\n').split()
+        ddisks = {}
+        df = subprocess.check_output(['df', '-h']).decode('utf-8').strip('\n').split()
+        mounts = subprocess.check_output('mount').decode('utf-8').strip('\n').split()
         return
-        # Format:
         # {
         # 'sda': {
         #         'sda1': {
@@ -215,8 +215,9 @@ def get_json():
     return jdb
 
 if __name__ == '__main__':
-     full_print()
-     print('==============================')
-     short_print()
-     with open('host.json', 'w') as outfile:
-         json.dump(get_json(), outfile)
+     #full_print()
+     #print('==============================')
+     #short_print()
+     #with open('host.json', 'w') as outfile:
+     #    json.dump(get_json(), outfile)
+     _get_disks()
