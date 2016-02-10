@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+# Copyright (c) 2016 John Adams <john@hexb.it> & Tom Carrio <tom@carrio.me>
+# Terrible coding is standard practice
+# Let me know what I can do better by emailing me at <sysinfo@hexb.it> or
+#  by submitting a pull request at (https://github.com/jadams/sysinfo)
+
 import os, sys, subprocess, datetime, json
 
 def _get_kernel():
