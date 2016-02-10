@@ -109,7 +109,9 @@ def _detect_distro():
     return
 
 def _get_processes():
-    return
+  pdict = {'_total':len([c for c in subprocess.check_output(['ps','aux']) if('\n'==c)])-1}
+  [pdict.update({u:len([c for c in subprocess.check_output(['ps','-u',u]) if('\n'==c)])-1}) for u in _get_users()]
+  return pdict
 
 def _get_hosts():
     return
