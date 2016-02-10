@@ -64,7 +64,7 @@ def _get_users():
             with open('/etc/passwd', 'r') as passwd:
                 for line in passwd:
                     line = line.strip('\n').split(':')
-                    if int(line[2]) >= 1000:
+                    if int(line[2]) >= 1000 and int(line[2]) < 65534:
                         users[line[0]] = {'uid':int(line[2]),
                                           'gid':int(line[3]),
                                           'home':line[5],
@@ -210,9 +210,8 @@ def get_json():
     return jdb
 
 if __name__ == '__main__':
-    # full_print()
-    # print('==============================')
-    # short_print()
-    # with open('host.json', 'w') as outfile:
-    #     json.dump(get_json(), outfile)
-    _get_disks()
+     full_print()
+     print('==============================')
+     short_print()
+     with open('host.json', 'w') as outfile:
+         json.dump(get_json(), outfile)
