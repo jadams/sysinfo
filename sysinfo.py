@@ -62,7 +62,7 @@ def _get_ip_route():
 
 def _get_users():
     if not os.path.isfile('/etc/passwd'):
-        return NULL
+        return
     else:
         users = {}
         try:
@@ -75,7 +75,7 @@ def _get_users():
                                           'home':line[5],
                                           'shell':line[6]}
         except:
-            return NULL
+            return
         return users
 
 def _get_disks():
@@ -122,7 +122,7 @@ def _get_disks():
         #         }
         # }
     except:
-        return NULL
+        return
 
 def _detect_distro():
     return
