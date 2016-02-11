@@ -81,28 +81,9 @@ def _get_users():
 def _get_disks():
     try:
         ddisks = {}
-        df_keys=['filesystem','size','used','avail','use%','mount']
-        df = subprocess.check_output(['df', '-h']).decode('utf-8').split('\n')
-        mounts = subprocess.check_output('mount').decode('utf-8')[:-1].split('\n')
-        
-        # pull info from 'df -h'
-        for line in df:
-            if('/dev' in line[:4]):
-                line=line.split()
-                ddisks.update({line[0]:dict()})
-                for i in range(1,6):
-                    ddisks[line[0]][df_keys[i]]=line[i]
-
-        # pull info from mount using new df dict
-        for m in mounts:
-            for d in ddisks:
-                m_info = m.split()
-                if(m_info[0]==d):
-                    #print(m_info[4])
-                    ddisks[d]['type']=m_info[4]
-                    #print(m_info[5].split(',')[0][1:])
-                    ddisks[d]['permission']=m_info[5].split(',')[0][1:]
-        return ddisks
+        df = subprocess.check_output(['df', '-h']).decode('utf-8').strip('\n').split()
+        mounts = subprocess.check_output('mount').decode('utf-8').strip('\n').split()
+        return
         # {
         # 'sda': {
         #         'sda1': {
@@ -215,10 +196,7 @@ def full_print():
 
     print('CPU:\t{}'.format(' '.join(_get_cpuinfo())))
     print('Memory:\t{used}/{total} Swap: {swap_used}/{swap_total}'.format(**_get_meminfo()))
-    print('Disks:')
-    for disk in _get_disks():
-        disk_info='Mounted:{mount} Used%:{use%} Avail:{avail} Size:{size} Type:{type} Permission:{permission}'.format(**_get_disks()[disk])
-        print('\t{}:\n\t{}'.format(disk,disk_info))
+
 def short_print():
     print(' '.join(_get_date()))
     print('{0}@{1}'.format(_get_current_user(), _get_fqdn()[0]))
@@ -236,12 +214,12 @@ def get_json():
     jdb['users'] = _get_users()
     jdb['cpu'] = _get_cpuinfo()
     jdb['mem'] = _get_meminfo()
-    jdb['disks'] = _get_disks()
     return jdb
 
 if __name__ == '__main__':
-     full_print()
-     print('==============================')
-     short_print()
-     with open('host.json', 'w') as outfile:
-        json.dump(get_json(), outfile)
+     #full_print()
+     #print('==============================')
+     #short_print()
+     #with open('host.json', 'w') as outfile:
+     #    json.dump(get_json(), outfile)
+     _get_disks()
