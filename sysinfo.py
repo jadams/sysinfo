@@ -62,7 +62,7 @@ def _get_ip_route():
 
 def _get_users():
     if not os.path.isfile('/etc/passwd'):
-        return NULL
+        return
     else:
         users = {}
         try:
@@ -75,7 +75,7 @@ def _get_users():
                                           'home':line[5],
                                           'shell':line[6]}
         except:
-            return NULL
+            return
         return users
 
 def _get_disks():
@@ -87,50 +87,31 @@ def _get_disks():
         
         # pull info from 'df -h'
         for line in df:
-            if('/dev' in line[:4]):
+            if('/'==line[0]):
                 line=line.split()
-                ddisks.update({line[0]:dict()})
-                for i in range(1,6):
-                    ddisks[line[0]][df_keys[i]]=line[i]
+                ddisks.update({line[5]:dict()})
+                for i in range(0,5):
+                    ddisks[line[5]][df_keys[i]]=line[i]
 
         # pull info from mount using new df dict
         for m in mounts:
             for d in ddisks:
                 m_info = m.split()
-                if(m_info[0]==d):
-                    #print(m_info[4])
+                if(m_info[2]==d):
                     ddisks[d]['type']=m_info[4]
-                    #print(m_info[5].split(',')[0][1:])
                     ddisks[d]['permission']=m_info[5].split(',')[0][1:]
-        return ddisks
-        # {
-        # 'sda': {
-        #         'sda1': {
-        #                 'fs':'vfat',
-        #                 'mount':'/boot/efi'
-        #                 },
-        #         'sda2': {
-        #                 'fs':'ext4',
-        #                 'mount':'/'
-        #                 }
-        #         },
-        # 'sdb': {
-        #         'sdb1': {
-        #                 'fs':'ntfs',
-        #                 'mount':'/windows'
-        #                 }
-        #         }
-        # }
+        return ddisks;
+    
     except:
-        return NULL
+        return
 
 def _detect_distro():
     return
 
 def _get_processes():
-  pdict = {'_total':len([c for c in subprocess.check_output(['ps','aux']) if('\n'==c)])-1}
-  [pdict.update({u:len([c for c in subprocess.check_output(['ps','-u',u]) if('\n'==c)])-1}) for u in _get_users()]
-  return pdict
+    pdict = {'_total':len([c for c in subprocess.check_output(['ps','aux']) if('\n'==c)])-1}
+    [pdict.update({u:len([c for c in subprocess.check_output(['ps','-u',u]) if('\n'==c)])-1}) for u in _get_users()]
+    return pdict
 
 def _get_hosts():
     return
@@ -240,8 +221,8 @@ def get_json():
     return jdb
 
 if __name__ == '__main__':
-     full_print()
-     print('==============================')
-     short_print()
-     with open('host.json', 'w') as outfile:
+    full_print()
+    print('==============================')
+    short_print()
+    with open('host.json', 'w') as outfile:
         json.dump(get_json(), outfile)
