@@ -100,7 +100,7 @@ def _get_disks():
                 if(m_info[2]==d):
                     ddisks[d]['type']=m_info[4]
                     ddisks[d]['permission']=m_info[5].split(',')[0][1:]
-        return ddisks;
+        return ddisks
     
     except:
         return
@@ -197,9 +197,10 @@ def full_print():
     print('CPU:\t{}'.format(' '.join(_get_cpuinfo())))
     print('Memory:\t{used}/{total} Swap: {swap_used}/{swap_total}'.format(**_get_meminfo()))
     print('Disks:')
-    for disk in _get_disks():
-        disk_info='Mounted:{mount} Used%:{use%} Avail:{avail} Size:{size} Type:{type} Permission:{permission}'.format(**_get_disks()[disk])
-        print('\t{}:\n\t{}'.format(disk,disk_info))
+    _disk_dict = _get_disks()
+    for disk in _disk_dict:
+        disk_info='Mount:{0} Used%:{use%} Avail:{avail} Size:{size} Type:{type} Permission:{permission}'.format(disk,**_disk_dict[disk])
+        print('\t{}:\n\t{}'.format(_disk_dict[disk]['filesystem'],disk_info))
 def short_print():
     print(' '.join(_get_date()))
     print('{0}@{1}'.format(_get_current_user(), _get_fqdn()[0]))
