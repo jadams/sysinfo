@@ -104,7 +104,6 @@ def _get_disks():
                     ddisks[d]['type']=m_info[4]
                     ddisks[d]['permission']=m_info[5].split(',')[0][1:]
         return ddisks
-    
     except:
         return
 
@@ -200,11 +199,13 @@ def full_print():
 
     print('CPU:\t{}'.format(' '.join(_get_cpuinfo())))
     print('Memory:\t{used}/{total} Swap: {swap_used}/{swap_total}'.format(**_get_meminfo()))
+
     print('Disks:')
     _disk_dict = _get_disks()
     for disk in _disk_dict:
         disk_info='\t\tMount:{0}, Type:{type}, Permission:{permission},\n\t\tSize:{size}, Avail:{avail}, Used%:{use%}'.format(disk,**_disk_dict[disk])
         print('\t{}:\n{}'.format(_disk_dict[disk]['filesystem'],disk_info))
+
 def short_print():
     print(' '.join(_get_date()))
     print('{0}@{1}'.format(_get_current_user(), _get_fqdn()[0]))
@@ -222,7 +223,6 @@ def get_json():
     jdb['users'] = _get_users()
     jdb['cpu'] = _get_cpuinfo()
     jdb['mem'] = _get_meminfo()
-    jdb['disks'] = _get_disks()
     return jdb
 
 if __name__ == '__main__':
