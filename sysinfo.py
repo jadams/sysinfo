@@ -87,24 +87,19 @@ def _get_disks():
         
         # pull info from 'df -h'
         for line in df:
-            #print('Line from df is: {}'.format(line))
             if('/'==line[0]):
                 line=line.split()
                 ddisks.update({line[5]:dict()})
                 for i in range(0,5):
                     ddisks[line[5]][df_keys[i]]=line[i]
-                #print('ddisks is now: \n{}'.format(ddisks))
 
         # pull info from mount using new df dict
-        #print('\n')
 	for m in mounts:
-	    #print('Line from mount is: {}'.format(m))
             for d in ddisks:
                 m_info = m.split()
                 if(m_info[2]==d):
                     ddisks[d]['type']=m_info[4]
                     ddisks[d]['permission']=m_info[5].split(',')[0][1:]
-		    #print('ddisks is now: \n{}'.format(ddisks))
         return ddisks
     
     except:
