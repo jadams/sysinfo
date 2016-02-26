@@ -82,45 +82,26 @@ def _get_disks():
     try:
         ddisks = {}
         df_keys=['filesystem','size','used','avail','use%','mount']
-        df = subprocess.check_output(['df', '-h']).decode('utf-8').split('\n')
+        df = subprocess.check_output(['df', '-h']).decode('utf-8')[:-1].split('\n')
         mounts = subprocess.check_output('mount').decode('utf-8')[:-1].split('\n')
         
         # pull info from 'df -h'
         for line in df:
-            if('/dev' in line[:4]):
+            if('/'==line[0]):
                 line=line.split()
-                ddisks.update({line[0]:dict()})
-                for i in range(1,6):
-                    ddisks[line[0]][df_keys[i]]=line[i]
+                ddisks.update({line[5]:dict()})
+                for i in range(0,5):
+                    ddisks[line[5]][df_keys[i]]=line[i]
 
         # pull info from mount using new df dict
         for m in mounts:
             for d in ddisks:
                 m_info = m.split()
-                if(m_info[0]==d):
-                    #print(m_info[4])
+                if(m_info[2]==d):
                     ddisks[d]['type']=m_info[4]
-                    #print(m_info[5].split(',')[0][1:])
                     ddisks[d]['permission']=m_info[5].split(',')[0][1:]
         return ddisks
-        # {
-        # 'sda': {
-        #         'sda1': {
-        #                 'fs':'vfat',
-        #                 'mount':'/boot/efi'
-        #                 },
-        #         'sda2': {
-        #                 'fs':'ext4',
-        #                 'mount':'/'
-        #                 }
-        #         },
-        # 'sdb': {
-        #         'sdb1': {
-        #                 'fs':'ntfs',
-        #                 'mount':'/windows'
-        #                 }
-        #         }
-        # }
+    
     except:
         return
 
@@ -128,9 +109,9 @@ def _detect_distro():
     return
 
 def _get_processes():
-  pdict = {'_total':len([c for c in subprocess.check_output(['ps','aux']) if('\n'==c)])-1}
-  [pdict.update({u:len([c for c in subprocess.check_output(['ps','-u',u]) if('\n'==c)])-1}) for u in _get_users()]
-  return pdict
+    pdict = {'_total':len([c for c in subprocess.check_output(['ps','aux']) if('\n'==c)])-1}
+    [pdict.update({u:len([c for c in subprocess.check_output(['ps','-u',u]) if('\n'==c)])-1}) for u in _get_users()]
+    return pdict
 
 def _get_hosts():
     return
@@ -216,9 +197,10 @@ def full_print():
     print('CPU:\t{}'.format(' '.join(_get_cpuinfo())))
     print('Memory:\t{used}/{total} Swap: {swap_used}/{swap_total}'.format(**_get_meminfo()))
     print('Disks:')
-    for disk in _get_disks():
-        disk_info='Mounted:{mount} Used%:{use%} Avail:{avail} Size:{size} Type:{type} Permission:{permission}'.format(**_get_disks()[disk])
-        print('\t{}:\n\t{}'.format(disk,disk_info))
+    _disk_dict = _get_disks()
+    for disk in _disk_dict:
+        disk_info='\t\tMount:{0}, Type:{type}, Permission:{permission},\n\t\tSize:{size}, Avail:{avail}, Used%:{use%}'.format(disk,**_disk_dict[disk])
+        print('\t{}:\n{}'.format(_disk_dict[disk]['filesystem'],disk_info))
 def short_print():
     print(' '.join(_get_date()))
     print('{0}@{1}'.format(_get_current_user(), _get_fqdn()[0]))
@@ -240,8 +222,8 @@ def get_json():
     return jdb
 
 if __name__ == '__main__':
-     full_print()
-     print('==============================')
-     short_print()
-     with open('host.json', 'w') as outfile:
+    full_print()
+    print('==============================')
+    short_print()
+    with open('host.json', 'w') as outfile:
         json.dump(get_json(), outfile)
