@@ -94,7 +94,7 @@ def _get_disks():
                     ddisks[line[5]][df_keys[i]]=line[i]
 
         # pull info from mount using new df dict
-	for m in mounts:
+        for m in mounts:
             for d in ddisks:
                 m_info = m.split()
                 if(m_info[2]==d):
@@ -199,8 +199,8 @@ def full_print():
     print('Disks:')
     _disk_dict = _get_disks()
     for disk in _disk_dict:
-        disk_info='Mount:{0} Used%:{use%} Avail:{avail} Size:{size} Type:{type} Permission:{permission}'.format(disk,**_disk_dict[disk])
-        print('\t{}:\n\t{}'.format(_disk_dict[disk]['filesystem'],disk_info))
+        disk_info='\t\tMount:{0}, Type:{type}, Permission:{permission},\n\t\tSize:{size}, Avail:{avail}, Used%:{use%}'.format(disk,**_disk_dict[disk])
+        print('\t{}:\n{}'.format(_disk_dict[disk]['filesystem'],disk_info))
 def short_print():
     print(' '.join(_get_date()))
     print('{0}@{1}'.format(_get_current_user(), _get_fqdn()[0]))
