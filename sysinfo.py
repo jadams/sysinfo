@@ -47,18 +47,21 @@ def _get_ip_route():
     route = subprocess.check_output(['ip', 'route']).decode('utf-8').strip('\n')
     route = route.split('\n')
     routes = {}
-    for line in route:
-        info = line.split()
-        name = info[0]
-        routes[name] = {}
-        for i in range(1,len(info)):
-            if info[i] == 'dev':
-                routes[name]['dev'] = info[i+1]
-            elif info[i] == 'via':
-                routes[name]['via'] = info[i+1]
-            elif info[i] == 'src':
-                routes[name]['src'] = info[i+1]
-    return routes
+    try:
+        for line in route:
+            info = line.split()
+            name = info[0]
+            routes[name] = {}
+            for i in range(1,len(info)):
+                if info[i] == 'dev':
+                    routes[name]['dev'] = info[i+1]
+                elif info[i] == 'via':
+                    routes[name]['via'] = info[i+1]
+                elif info[i] == 'src':
+                    routes[name]['src'] = info[i+1]
+        return routes
+    except:
+        return 
 
 def _get_users():
     if not os.path.isfile('/etc/passwd'):
@@ -181,12 +184,13 @@ def full_print():
 
     print('Routes:')
     iproute = _get_ip_route()
-    for route in iproute:
-        proute = '\t{}'.format(route)
-        for key in iproute[route]:
-            #proute = proute+' '+key+' '+iproute[route][key]
-            proute = '{0} {1} {2}'.format(proute, key, iproute[route][key])
-        print(proute)
+    if iproute:
+        for route in iproute:
+            proute = '\t{}'.format(route)
+            for key in iproute[route]:
+                #proute = proute+' '+key+' '+iproute[route][key]
+                proute = '{0} {1} {2}'.format(proute, key, iproute[route][key])
+            print(proute)
 
     print('Users:')
     users = _get_users()
