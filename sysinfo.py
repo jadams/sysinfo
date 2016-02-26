@@ -47,18 +47,21 @@ def _get_ip_route():
     route = subprocess.check_output(['ip', 'route']).decode('utf-8').strip('\n')
     route = route.split('\n')
     routes = {}
-    for line in route:
-        info = line.split()
-        name = info[0]
-        routes[name] = {}
-        for i in range(1,len(info)):
-            if info[i] == 'dev':
-                routes[name]['dev'] = info[i+1]
-            elif info[i] == 'via':
-                routes[name]['via'] = info[i+1]
-            elif info[i] == 'src':
-                routes[name]['src'] = info[i+1]
-    return routes
+    try:
+        for line in route:
+            info = line.split()
+            name = info[0]
+            routes[name] = {}
+            for i in range(1,len(info)):
+                if info[i] == 'dev':
+                    routes[name]['dev'] = info[i+1]
+                elif info[i] == 'via':
+                    routes[name]['via'] = info[i+1]
+                elif info[i] == 'src':
+                    routes[name]['src'] = info[i+1]
+        return routes
+    except:
+        return 
 
 def _get_users():
     if not os.path.isfile('/etc/passwd'):
@@ -81,27 +84,26 @@ def _get_users():
 def _get_disks():
     try:
         ddisks = {}
-        df = subprocess.check_output(['df', '-h']).decode('utf-8').strip('\n').split()
-        mounts = subprocess.check_output('mount').decode('utf-8').strip('\n').split()
-        return
-        # {
-        # 'sda': {
-        #         'sda1': {
-        #                 'fs':'vfat',
-        #                 'mount':'/boot/efi'
-        #                 },
-        #         'sda2': {
-        #                 'fs':'ext4',
-        #                 'mount':'/'
-        #                 }
-        #         },
-        # 'sdb': {
-        #         'sdb1': {
-        #                 'fs':'ntfs',
-        #                 'mount':'/windows'
-        #                 }
-        #         }
-        # }
+        df_keys=['filesystem','size','used','avail','use%','mount']
+        df = subprocess.check_output(['df', '-h']).decode('utf-8')[:-1].split('\n')
+        mounts = subprocess.check_output('mount').decode('utf-8')[:-1].split('\n')
+        
+        # pull info from 'df -h'
+        for line in df:
+            if('/'==line[0]):
+                line=line.split()
+                ddisks.update({line[5]:dict()})
+                for i in range(0,5):
+                    ddisks[line[5]][df_keys[i]]=line[i]
+
+        # pull info from mount using new df dict
+        for m in mounts:
+            for d in ddisks:
+                m_info = m.split()
+                if(m_info[2]==d):
+                    ddisks[d]['type']=m_info[4]
+                    ddisks[d]['permission']=m_info[5].split(',')[0][1:]
+        return ddisks
     except:
         return
 
@@ -109,9 +111,10 @@ def _detect_distro():
     return
 
 def _get_processes():
-  pdict = {'_total':len([c for c in subprocess.check_output(['ps','aux']) if('\n'==c)])-1}
-  [pdict.update({u:len([c for c in subprocess.check_output(['ps','-u',u]) if('\n'==c)])-1}) for u in _get_users()]
-  return pdict
+    pdict = {'_total':len([c for c in subprocess.check_output(['ps','aux']) if('\n'==c)])-1}
+    pdict.update({'users':{}})
+    [pdict.update({'users':{u:len([c for c in subprocess.check_output(['ps','-u',u]) if('\n'==c)])-1}}) for u in _get_users()]
+    return pdict
 
 def _get_hosts():
     return
@@ -181,12 +184,13 @@ def full_print():
 
     print('Routes:')
     iproute = _get_ip_route()
-    for route in iproute:
-        proute = '\t{}'.format(route)
-        for key in iproute[route]:
-            #proute = proute+' '+key+' '+iproute[route][key]
-            proute = '{0} {1} {2}'.format(proute, key, iproute[route][key])
-        print(proute)
+    if iproute:
+        for route in iproute:
+            proute = '\t{}'.format(route)
+            for key in iproute[route]:
+                #proute = proute+' '+key+' '+iproute[route][key]
+                proute = '{0} {1} {2}'.format(proute, key, iproute[route][key])
+            print(proute)
 
     print('Users:')
     users = _get_users()
@@ -196,6 +200,20 @@ def full_print():
 
     print('CPU:\t{}'.format(' '.join(_get_cpuinfo())))
     print('Memory:\t{used}/{total} Swap: {swap_used}/{swap_total}'.format(**_get_meminfo()))
+
+    print('Processes:')
+    processes=_get_processes()
+    if(processes):
+        for username in processes['users']:
+            print('\t{0}: {1}'.format(username,processes['users'][username]))
+        print('\t{0}: {1}'.format('Total',processes['_total']))
+
+    print('Disks:')
+    _disk_dict = _get_disks()
+    for disk in _disk_dict:
+        disk_info='\t\tMount:{0}, Type:{type}, Permission:{permission},\n\t\tSize:{size}, Avail:{avail}, Used%:{use%}'.format(disk,**_disk_dict[disk])
+        print('\t{}:\n{}'.format(_disk_dict[disk]['filesystem'],disk_info))
+
 
 def short_print():
     print(' '.join(_get_date()))
@@ -217,9 +235,8 @@ def get_json():
     return jdb
 
 if __name__ == '__main__':
-     #full_print()
-     #print('==============================')
-     #short_print()
-     #with open('host.json', 'w') as outfile:
-     #    json.dump(get_json(), outfile)
-     _get_disks()
+    full_print()
+    print('==============================')
+    short_print()
+    with open('host.json', 'w') as outfile:
+        json.dump(get_json(), outfile)
