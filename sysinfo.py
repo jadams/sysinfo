@@ -82,24 +82,29 @@ def _get_disks():
     try:
         ddisks = {}
         df_keys=['filesystem','size','used','avail','use%','mount']
-        df = subprocess.check_output(['df', '-h']).decode('utf-8').split('\n')
+        df = subprocess.check_output(['df', '-h']).decode('utf-8')[:-1].split('\n')
         mounts = subprocess.check_output('mount').decode('utf-8')[:-1].split('\n')
         
         # pull info from 'df -h'
         for line in df:
+            #print('Line from df is: {}'.format(line))
             if('/'==line[0]):
                 line=line.split()
                 ddisks.update({line[5]:dict()})
                 for i in range(0,5):
                     ddisks[line[5]][df_keys[i]]=line[i]
+                #print('ddisks is now: \n{}'.format(ddisks))
 
         # pull info from mount using new df dict
-        for m in mounts:
+        #print('\n')
+	for m in mounts:
+	    #print('Line from mount is: {}'.format(m))
             for d in ddisks:
                 m_info = m.split()
                 if(m_info[2]==d):
                     ddisks[d]['type']=m_info[4]
                     ddisks[d]['permission']=m_info[5].split(',')[0][1:]
+		    #print('ddisks is now: \n{}'.format(ddisks))
         return ddisks
     
     except:
