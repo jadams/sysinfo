@@ -112,7 +112,8 @@ def _detect_distro():
 
 def _get_processes():
     pdict = {'_total':len([c for c in subprocess.check_output(['ps','aux']) if('\n'==c)])-1}
-    [pdict.update({u:len([c for c in subprocess.check_output(['ps','-u',u]) if('\n'==c)])-1}) for u in _get_users()]
+    pdict.update({'users':{}})
+    [pdict.update({'users':{u:len([c for c in subprocess.check_output(['ps','-u',u]) if('\n'==c)])-1}}) for u in _get_users()]
     return pdict
 
 def _get_hosts():
@@ -200,11 +201,19 @@ def full_print():
     print('CPU:\t{}'.format(' '.join(_get_cpuinfo())))
     print('Memory:\t{used}/{total} Swap: {swap_used}/{swap_total}'.format(**_get_meminfo()))
 
+    print('Processes:')
+    processes=_get_processes()
+    if(processes):
+        for username in processes['users']:
+            print('\t{0}: {1}'.format(username,processes['users'][username]))
+        print('\t{0}: {1}'.format('Total',processes['_total']))
+
     print('Disks:')
     _disk_dict = _get_disks()
     for disk in _disk_dict:
         disk_info='\t\tMount:{0}, Type:{type}, Permission:{permission},\n\t\tSize:{size}, Avail:{avail}, Used%:{use%}'.format(disk,**_disk_dict[disk])
         print('\t{}:\n{}'.format(_disk_dict[disk]['filesystem'],disk_info))
+
 
 def short_print():
     print(' '.join(_get_date()))
